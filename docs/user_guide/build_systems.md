@@ -5,9 +5,10 @@ This document explains how to integrate `tincup` with different build systems.
 ## Quick Reference
 
 | Build System | Integration Path | Documentation |
-|--------------|------------------|---------------|
-| CMake (FetchContent) | Root `CMakeLists.txt` (compatibility) | This document |
-| CMake (Manual) | `build_systems/cmake/` | `build_systems/cmake/README.md` |
+[|--------------|------------------|---------------|](|--------------|------------------|---------------|)
+| CMake (FetchContent) | Root `CMakeLists.txt` | This document |
+| CMake (Installed Package) | `find_package()` (Config) | This document |
+| CMake (Advanced Subdir) | `build_systems/cmake/` | `build_systems/cmake/README.md` |
 | Meson | `build_systems/meson/` | `build_systems/meson/README.md` |
 | Make (Development) | `build_systems/make/` | `build_systems/make/README.md` |
 
@@ -28,9 +29,31 @@ FetchContent_MakeAvailable(tincup)
 target_link_libraries(your_target PRIVATE tincup::tincup)
 ```
 
-**How it works:** The root `CMakeLists.txt` is a compatibility shim that delegates to the actual configuration in `build_systems/cmake/CMakeLists.txt`. This keeps the root directory clean while maintaining compatibility with existing projects.
+**How it works:** The root `CMakeLists.txt` delegates to `build_systems/cmake/CMakeLists.txt` to keep the root clean while maintaining compatibility with existing projects.
 
-### Option 2: Direct Subdir (Advanced)
+### Option 2: Installed Package (find_package)
+
+Build and install `tincup` itself (or obtain from a package manager) and use it as a package:
+
+```bash
+# in tincup root dir
+cmake -S . -B build
+cmake --build build
+cmake --install build --prefix /path/to/tincup-install
+```
+
+```cmake
+find_package(tincup CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE tincup::tincup)
+```
+
+If you installed to a custom prefix, pass it via `CMAKE_PREFIX_PATH`:
+
+```bash
+cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/tincup-install
+```
+
+### Option 3: Direct Subdir (Advanced)
 
 If you want to explicitly use the organized structure:
 
@@ -41,7 +64,7 @@ FetchContent_Declare(tincup
 FetchContent_MakeAvailable(tincup)
 ```
 
-### Option 3: Manual Integration
+### Option 4: Manual Integration
 
 Download the repository and:
 

@@ -272,7 +272,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake meson ninja-build
-      - name: Smoke compile (CMake consumer)
+      - name: Smoke compile (CMake add_subdirectory)
         run: |
           mkdir -p build/smoke
           cat > build/smoke/CMakeLists.txt << 'EOF'
@@ -288,6 +288,26 @@ jobs:
           EOF
           cmake -S build/smoke -B build/smoke_build -G Ninja
           cmake --build build/smoke_build -v
+      - name: Smoke compile (CMake find_package)
+        run: |
+          cmake -S . -B build/tincup_pkg -G Ninja -DTINCUP_ENABLE_TESTING=OFF
+          cmake --build build/tincup_pkg
+          cmake --install build/tincup_pkg --prefix build/tincup_install
+
+          mkdir -p build/smoke_find_package
+          cat > build/smoke_find_package/CMakeLists.txt << 'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(tincup_smoke_find_package CXX)
+          find_package(tincup CONFIG REQUIRED)
+          add_executable(smoke main.cpp)
+          target_link_libraries(smoke PRIVATE tincup::tincup)
+          EOF
+          cat > build/smoke_find_package/main.cpp << 'EOF'
+          #include <tincup/tincup.hpp>
+          int main() { return 0; }
+          EOF
+          cmake -S build/smoke_find_package -B build/smoke_find_package_build -G Ninja -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/build/tincup_install"
+          cmake --build build/smoke_find_package_build -v
       - name: Smoke compile (Meson consumer)
         run: |
           mkdir -p build/meson_smoke/subprojects

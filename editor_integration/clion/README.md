@@ -130,13 +130,14 @@ Suggested shortcuts:
 CLion automatically detects CMake projects. The TInCuP library integrates seamlessly:
 
 ```cmake
-# In your CMakeLists.txt
-find_package(tincup REQUIRED)
+# In your CMakeLists.txt (installed package)
+find_package(tincup CONFIG REQUIRED)
 target_link_libraries(your_target PRIVATE tincup::tincup)
 ```
 
-Or with FetchContent:
+Or with FetchContent (top-level entrypoint):
 ```cmake
+include(FetchContent)
 FetchContent_Declare(tincup 
     GIT_REPOSITORY https://github.com/sandialabs/TInCuP.git)
 FetchContent_MakeAvailable(tincup)

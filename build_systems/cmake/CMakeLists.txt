@@ -11,8 +11,49 @@
 add_library(tincup INTERFACE)
 add_library(tincup::tincup ALIAS tincup)
 
-target_include_directories(tincup INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
+target_include_directories(tincup INTERFACE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../include>"
+  "$<INSTALL_INTERFACE:include>"
+)
 target_compile_features(tincup INTERFACE cxx_std_20)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(TINCUP_PACKAGE_VERSION "${PROJECT_VERSION}")
+if(TINCUP_PACKAGE_VERSION STREQUAL "")
+  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../VERSION" TINCUP_PACKAGE_VERSION)
+  string(STRIP "${TINCUP_PACKAGE_VERSION}" TINCUP_PACKAGE_VERSION)
+endif()
+
+install(TARGETS tincup EXPORT tincupTargets
+  INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../include/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+install(EXPORT tincupTargets
+  NAMESPACE tincup::
+  FILE tincupTargets.cmake
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tincup"
+)
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/tincupConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/tincupConfig.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tincup"
+)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/tincupConfigVersion.cmake"
+  VERSION "${TINCUP_PACKAGE_VERSION}"
+  COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/tincupConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/tincupConfigVersion.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tincup"
+)
 
 # --- Warnings policy (applies only to in-tree tests/examples) ---
 option(TINCUP_ENABLE_WARNINGS "Enable compiler warnings for TInCuP tests/examples" ON)

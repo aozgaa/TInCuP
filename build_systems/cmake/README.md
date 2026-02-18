@@ -6,13 +6,13 @@ Use this directory to integrate `tincup` with CMake-based projects.
 
 ```bash
 # From your project root
-cd build_systems/cmake
-mkdir build && cd build
-cmake ..
-make
+cmake -S . -B build
+cmake --build build
 ```
 
 ## Integration with Your Project
+
+### FetchContent (top-level entrypoint)
 
 Add this to your `CMakeLists.txt`:
 
@@ -27,6 +27,17 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(tincup)
+
+# Link to your target
+target_link_libraries(your_target PRIVATE tincup::tincup)
+```
+
+### Installed Package
+
+Add this to your `CMakeLists.txt`:
+
+```cmake
+find_package(tincup CONFIG REQUIRED)
 
 # Link to your target
 target_link_libraries(your_target PRIVATE tincup::tincup)

@@ -220,6 +220,30 @@ EOF
     
     # Test the smoke executable
     "$smoke_dir/build/smoke"
+
+    # Smoke test (installed package via find_package)
+    local install_prefix="$cmake_build_dir/install_prefix"
+    cmake --install "$cmake_build_dir" --prefix "$install_prefix"
+
+    local find_package_smoke_dir="$cmake_build_dir/smoke_find_package"
+    mkdir -p "$find_package_smoke_dir"
+
+    cat > "$find_package_smoke_dir/CMakeLists.txt" << 'EOF'
+cmake_minimum_required(VERSION 3.20)
+project(tincup_find_package_smoke CXX)
+find_package(tincup CONFIG REQUIRED)
+add_executable(smoke main.cpp)
+target_link_libraries(smoke PRIVATE tincup::tincup)
+EOF
+
+    cat > "$find_package_smoke_dir/main.cpp" << 'EOF'
+#include <tincup/tincup.hpp>
+int main() { return 0; }
+EOF
+
+    cmake -S "$find_package_smoke_dir" -B "$find_package_smoke_dir/build" -DCMAKE_PREFIX_PATH="$install_prefix"
+    cmake --build "$find_package_smoke_dir/build" -v
+    "$find_package_smoke_dir/build/smoke"
     
     log_success "CMake with $compiler completed"
 }

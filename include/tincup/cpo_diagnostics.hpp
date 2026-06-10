@@ -13,6 +13,8 @@ Questions? Contact Greg von Winckel (gvonwin@sandia.gov)
 #include "dereference.hpp"
 #include "type_list.hpp"
 
+#include <string_view>
+
 namespace tincup {
 
 // Forward declaration for cpo_traits (defined later)
